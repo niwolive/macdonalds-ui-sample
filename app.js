@@ -27,9 +27,8 @@ let model = {
  * model -> newModel
  */
 const Msg = {
-  Focus: model => id => {
-    const entry = model.state.get(id);
-    model.state.set(id, Object.assign(entry, {focused: true}));
+  Focus: id => model =>  {
+    console.log(`FOCUS ${id}`); return model;
   },
   Blur: model => {console.log("Blur")},
   Change: model => {console.log("Change")},
@@ -40,23 +39,31 @@ const update = Msg => model => Msg(model);
 /**
  * VIEW
  */
-// EditableList - An editable list of items
-
-const Container = Children => <ul>{Children}</ul>;
-const ListItem = ([id, {text}]) => 
-                   <li key={id} onClick={() => update(Msg.Focus)(model)(id)}>{text}</li>;
-const mapItems = ({state}) => 
-                   [...state].map(ListItem);
-const List = compose(Container, mapItems);
+const view = (signal,model) => {
+  const Container = Children => <ul>{Children}</ul>;
+  const ListItem = ([id, {text}]) => <li key={id} onClick={signal(Msg.Focus(id))}>{text}</li>;
+  const mapItems = ({state}) => [...state].map(ListItem);
+  return compose(Container, mapItems)({...model});
+};
 
 // App initialisation
-List.render = node => props => ReactDOM.render(<List {...props} />, node);
-const render = List.render(document.getElementById('app'));
-render(model);
+class AppContainer extends React.Component {
+  constructor(props){
+    super(props);
+    this.state = {model: props.model};
+  }
+  signal(msg){
+    return () => {
+      const model = this.props.update(msg)(this.state.model);
+      this.setState({model});
+    }
+  }
+  render() {
+    return this.props.view(this.signal.bind(this), this.state.model);
+  }
+}
 
-
-
-
+ReactDOM.render(<AppContainer model={model} update={update} view={view} />, document.getElementById('app'));
 
 
 

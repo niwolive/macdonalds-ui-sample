@@ -1,6 +1,16 @@
 'use strict';
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
@@ -36,10 +46,9 @@ var model = {
  * model -> newModel
  */
 var Msg = {
-  Focus: function Focus(model) {
-    return function (id) {
-      var entry = model.state.get(id);
-      model.state.set(id, Object.assign(entry, { focused: true }));
+  Focus: function Focus(id) {
+    return function (model) {
+      console.log('FOCUS ' + id);return model;
     };
   },
   Blur: function Blur(model) {
@@ -59,42 +68,67 @@ var update = function update(Msg) {
 /**
  * VIEW
  */
-// EditableList - An editable list of items
+var view = function view(signal, model) {
+  var Container = function Container(Children) {
+    return React.createElement(
+      'ul',
+      null,
+      Children
+    );
+  };
+  var ListItem = function ListItem(_ref) {
+    var _ref2 = _slicedToArray(_ref, 2),
+        id = _ref2[0],
+        text = _ref2[1].text;
 
-var Container = function Container(Children) {
-  return React.createElement(
-    'ul',
-    null,
-    Children
-  );
+    return React.createElement(
+      'li',
+      { key: id, onClick: signal(Msg.Focus(id)) },
+      text
+    );
+  };
+  var mapItems = function mapItems(_ref3) {
+    var state = _ref3.state;
+    return [].concat(_toConsumableArray(state)).map(ListItem);
+  };
+  return compose(Container, mapItems)(_extends({}, model));
 };
-var ListItem = function ListItem(_ref) {
-  var _ref2 = _slicedToArray(_ref, 2),
-      id = _ref2[0],
-      text = _ref2[1].text;
-
-  return React.createElement(
-    'li',
-    { key: id, onClick: function onClick() {
-        return update(Msg.Focus)(model)(id);
-      } },
-    text
-  );
-};
-var mapItems = function mapItems(_ref3) {
-  var state = _ref3.state;
-  return [].concat(_toConsumableArray(state)).map(ListItem);
-};
-var List = compose(Container, mapItems);
 
 // App initialisation
-List.render = function (node) {
-  return function (props) {
-    return ReactDOM.render(React.createElement(List, props), node);
-  };
-};
-var render = List.render(document.getElementById('app'));
-render(model);
+
+var AppContainer = function (_React$Component) {
+  _inherits(AppContainer, _React$Component);
+
+  function AppContainer(props) {
+    _classCallCheck(this, AppContainer);
+
+    var _this = _possibleConstructorReturn(this, (AppContainer.__proto__ || Object.getPrototypeOf(AppContainer)).call(this, props));
+
+    _this.state = { model: props.model };
+    return _this;
+  }
+
+  _createClass(AppContainer, [{
+    key: 'signal',
+    value: function signal(msg) {
+      var _this2 = this;
+
+      return function () {
+        var model = _this2.props.update(msg)(_this2.state.model);
+        _this2.setState({ model: model });
+      };
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      return this.props.view(this.signal.bind(this), this.state.model);
+    }
+  }]);
+
+  return AppContainer;
+}(React.Component);
+
+ReactDOM.render(React.createElement(AppContainer, { model: model, update: update, view: view }), document.getElementById('app'));
 
 //const Column = props => (<div>
 //                             <p>{props.head}</p>
