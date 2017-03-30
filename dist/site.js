@@ -2,8 +2,6 @@
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -38,8 +36,11 @@ var compose = function compose(first) {
  * MODEL
  *
  */
-var model = {
+var model1 = {
   state: new Map([[0, { text: 'Zero' }], [1, { text: 'one' }], [2, { text: 'Two' }]])
+};
+var model2 = {
+  state: new Map([[0, { text: 'Zero' }], [1, { text: 'TOTO' }], [2, { text: 'TATA' }]])
 };
 /**
  * UPDATE
@@ -101,29 +102,28 @@ var view = function view(signal, model) {
       React.createElement('input', { type: 'text', onKeyPress: viewHelper.appendOnReturn })
     );
   };
-  //const ListItem = ([id, {text}]) => <li key={id} onClick={signal(Msg.Focus(id))}>{text}</li>;
   var mapItems = function mapItems(_ref3) {
     var state = _ref3.state;
     return [].concat(_toConsumableArray(state)).map(ListItem).concat([InputItem(state.size)]);
   };
-  return compose(Container, mapItems)(_extends({}, model));
+  return compose(Container, mapItems)(model);
 };
 
 // App initialisation
 
-var AppContainer = function (_React$Component) {
-  _inherits(AppContainer, _React$Component);
+var EditableList = function (_React$Component) {
+  _inherits(EditableList, _React$Component);
 
-  function AppContainer(props) {
-    _classCallCheck(this, AppContainer);
+  function EditableList(props) {
+    _classCallCheck(this, EditableList);
 
-    var _this = _possibleConstructorReturn(this, (AppContainer.__proto__ || Object.getPrototypeOf(AppContainer)).call(this, props));
+    var _this = _possibleConstructorReturn(this, (EditableList.__proto__ || Object.getPrototypeOf(EditableList)).call(this, props));
 
     _this.state = { model: props.model };
     return _this;
   }
 
-  _createClass(AppContainer, [{
+  _createClass(EditableList, [{
     key: 'signal',
     value: function signal(msg) {
       var _this2 = this;
@@ -140,23 +140,36 @@ var AppContainer = function (_React$Component) {
     }
   }]);
 
-  return AppContainer;
+  return EditableList;
 }(React.Component);
 
-ReactDOM.render(React.createElement(AppContainer, { model: model, update: update, view: view }), document.getElementById('app'));
-ReactDOM.render(React.createElement(AppContainer, { model: model, update: update, view: view }), document.getElementById('app'));
-
-//const Column = props => (<div>
-//                             <p>{props.head}</p>
-//                             {props.children}
-//                           </div>);
-//
-//
-//const Board = () => {
-//  return (<Column head="Eating at MacDonals">
-//            <Column head="Pros"><EditableList /></Column>
-//            <Column head="Cons"><EditableList /></Column>
-//          </Column>)
-//}
-//
+var Column = function Column(props) {
+  return React.createElement(
+    'div',
+    null,
+    React.createElement(
+      'p',
+      null,
+      props.head
+    ),
+    props.children
+  );
+};
+var Board = function Board() {
+  return React.createElement(
+    Column,
+    { head: 'Eating at MacDonals' },
+    React.createElement(
+      Column,
+      { head: 'Pros' },
+      React.createElement(EditableList, { model: model1, update: update, view: view })
+    ),
+    React.createElement(
+      Column,
+      { head: 'Cons' },
+      React.createElement(EditableList, { model: model2, update: update, view: view })
+    )
+  );
+};
+ReactDOM.render(React.createElement(Board, null), document.getElementById('app'));
 

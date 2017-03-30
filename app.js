@@ -17,10 +17,15 @@ const compose = (first, ...rest) =>
  * MODEL
  *
  */
-let model = {
+let pros = {
   state: new Map([[0, {text: 'Zero'}],
                   [1, {text: 'one'}],
                   [2, {text: 'Two'}]])
+};
+let cons = {
+  state: new Map([[0, {text: 'Zero'}],
+                  [1, {text: 'TOTO'}],
+                  [2, {text: 'TATA'}]])
 };
 /**
  * UPDATE
@@ -51,11 +56,11 @@ const view = (signal,model) => {
   const InputItem = key => <li key={key}><input type="text" onKeyPress={viewHelper.appendOnReturn} /></li>;
   const mapItems = ({state}) => [...state].map(ListItem)
                                           .concat([InputItem(state.size)]);
-  return compose(Container, mapItems)({...model});
+  return compose(Container, mapItems)(model);
 };
 
 // App initialisation
-class AppContainer extends React.Component {
+class EditableList extends React.Component {
   constructor(props){
     super(props);
     this.state = {model: props.model};
@@ -71,20 +76,14 @@ class AppContainer extends React.Component {
   }
 }
 
-ReactDOM.render(<AppContainer model={model} update={update} view={view} />, document.getElementById('app'));
-
-
-
-//const Column = props => (<div>
-//                             <p>{props.head}</p>
-//                             {props.children}
-//                           </div>);
-//
-//
-//const Board = () => {
-//  return (<Column head="Eating at MacDonals">
-//            <Column head="Pros"><EditableList /></Column>
-//            <Column head="Cons"><EditableList /></Column>
-//          </Column>)
-//}
-//
+const Column = props => (<div>
+                             <p>{props.head}</p>
+                             {props.children}
+                           </div>);
+const Board = () => {
+  return (<Column head="Eating at MacDonals">
+            <Column head="Pros"><EditableList model={pros} update={update} view={view}/></Column>
+            <Column head="Cons"><EditableList model={cons} update={update} view={view}/></Column>
+          </Column>)
+}
+ReactDOM.render(<Board />, document.getElementById('app'));
