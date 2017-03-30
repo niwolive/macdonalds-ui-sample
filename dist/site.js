@@ -39,7 +39,7 @@ var compose = function compose(first) {
  *
  */
 var model = {
-  state: new Map([[0, { text: 'Zero', focused: false }], [1, { text: 'one', focused: false }], [2, { text: '', focused: false }]])
+  state: new Map([[0, { text: 'Zero' }], [1, { text: 'one' }], [2, { text: 'Two' }]])
 };
 /**
  * UPDATE
@@ -54,8 +54,10 @@ var Msg = {
   Blur: function Blur(model) {
     console.log("Blur");
   },
-  Change: function Change(model) {
-    console.log("Change");
+  Append: function Append(data) {
+    return function (model) {
+      model.state.set(model.state.size, { text: data });return model;
+    };
   }
 };
 
@@ -69,6 +71,11 @@ var update = function update(Msg) {
  * VIEW
  */
 var view = function view(signal, model) {
+  var viewHelper = {
+    appendOnReturn: function appendOnReturn(e) {
+      if (e.key === 'Enter') signal(Msg.Append(e.target.value))();
+    }
+  };
   var Container = function Container(Children) {
     return React.createElement(
       'ul',
@@ -83,13 +90,21 @@ var view = function view(signal, model) {
 
     return React.createElement(
       'li',
-      { key: id, onClick: signal(Msg.Focus(id)) },
+      { key: id },
       text
     );
   };
+  var InputItem = function InputItem(key) {
+    return React.createElement(
+      'li',
+      { key: key },
+      React.createElement('input', { type: 'text', onKeyPress: viewHelper.appendOnReturn })
+    );
+  };
+  //const ListItem = ([id, {text}]) => <li key={id} onClick={signal(Msg.Focus(id))}>{text}</li>;
   var mapItems = function mapItems(_ref3) {
     var state = _ref3.state;
-    return [].concat(_toConsumableArray(state)).map(ListItem);
+    return [].concat(_toConsumableArray(state)).map(ListItem).concat([InputItem(state.size)]);
   };
   return compose(Container, mapItems)(_extends({}, model));
 };
@@ -128,6 +143,7 @@ var AppContainer = function (_React$Component) {
   return AppContainer;
 }(React.Component);
 
+ReactDOM.render(React.createElement(AppContainer, { model: model, update: update, view: view }), document.getElementById('app'));
 ReactDOM.render(React.createElement(AppContainer, { model: model, update: update, view: view }), document.getElementById('app'));
 
 //const Column = props => (<div>

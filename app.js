@@ -18,9 +18,9 @@ const compose = (first, ...rest) =>
  *
  */
 let model = {
-  state: new Map([[0, {text: 'Zero', focused: false}],
-                  [1, {text: 'one', focused: false}],
-                  [2, {text: '', focused: false}]])
+  state: new Map([[0, {text: 'Zero'}],
+                  [1, {text: 'one'}],
+                  [2, {text: 'Two'}]])
 };
 /**
  * UPDATE
@@ -31,7 +31,7 @@ const Msg = {
     console.log(`FOCUS ${id}`); return model;
   },
   Blur: model => {console.log("Blur")},
-  Change: model => {console.log("Change")},
+  Append: data => model => {model.state.set(model.state.size,{text: data}); return model;},
 };
 
 const update = Msg => model => Msg(model);
@@ -40,9 +40,17 @@ const update = Msg => model => Msg(model);
  * VIEW
  */
 const view = (signal,model) => {
+  const viewHelper = {
+    appendOnReturn(e){
+      if (e.key === 'Enter')
+        signal(Msg.Append(e.target.value))();
+    }
+  };
   const Container = Children => <ul>{Children}</ul>;
-  const ListItem = ([id, {text}]) => <li key={id} onClick={signal(Msg.Focus(id))}>{text}</li>;
-  const mapItems = ({state}) => [...state].map(ListItem);
+  const ListItem = ([id, {text}]) => <li key={id}>{text}</li>;
+  const InputItem = key => <li key={key}><input type="text" onKeyPress={viewHelper.appendOnReturn} /></li>;
+  const mapItems = ({state}) => [...state].map(ListItem)
+                                          .concat([InputItem(state.size)]);
   return compose(Container, mapItems)({...model});
 };
 
