@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -34,37 +34,25 @@ var compose = function compose(first) {
 
 /**
  * MODEL
- *
  */
-var model1 = {
-  state: new Map([[0, { text: 'Zero' }], [1, { text: 'one' }], [2, { text: 'Two' }]])
+var model = {
+  state: new Map()
 };
-var model2 = {
-  state: new Map([[0, { text: 'Zero' }], [1, { text: 'TOTO' }], [2, { text: 'TATA' }]])
-};
+
 /**
  * UPDATE
- * model -> newModel
+ * return an updated copy of the model, without ever mutating the original data
  */
-var Msg = {
-  Focus: function Focus(id) {
+var Msg = { append: function append(data) {
     return function (model) {
-      console.log('FOCUS ' + id);return model;
-    };
-  },
-  Blur: function Blur(model) {
-    console.log("Blur");
-  },
-  Append: function Append(data) {
-    return function (model) {
-      model.state.set(model.state.size, { text: data });return model;
+      return Object.assign(model.state, { state: new Map(model.state.entries()).set(model.state.size, data) });
     };
   }
 };
 
-var update = function update(Msg) {
+var update = function update(msg) {
   return function (model) {
-    return Msg(model);
+    return msg(model);
   };
 };
 
@@ -72,14 +60,14 @@ var update = function update(Msg) {
  * VIEW
  */
 var view = function view(signal, model) {
-  var viewHelper = {
-    appendOnReturn: function appendOnReturn(e) {
-      if (e.key === 'Enter') signal(Msg.Append(e.target.value))();
-    }
+  // When handling keypresses, trigger the 'append' signal only if key 'Enter' is pressed
+  var appendOnReturn = function appendOnReturn(evt) {
+    return evt.key === 'Enter' && signal(Msg.append(evt.target.value))();
   };
+
   var Container = function Container(Children) {
     return React.createElement(
-      'ul',
+      "ul",
       null,
       Children
     );
@@ -87,19 +75,19 @@ var view = function view(signal, model) {
   var ListItem = function ListItem(_ref) {
     var _ref2 = _slicedToArray(_ref, 2),
         id = _ref2[0],
-        text = _ref2[1].text;
+        text = _ref2[1];
 
     return React.createElement(
-      'li',
+      "li",
       { key: id },
       text
     );
   };
   var InputItem = function InputItem(key) {
     return React.createElement(
-      'li',
+      "li",
       { key: key },
-      React.createElement('input', { type: 'text', onKeyPress: viewHelper.appendOnReturn })
+      React.createElement("input", { type: "text", onKeyPress: appendOnReturn, autoFocus: true })
     );
   };
   var mapItems = function mapItems(_ref3) {
@@ -109,7 +97,7 @@ var view = function view(signal, model) {
   return compose(Container, mapItems)(model);
 };
 
-// App initialisation
+// Create a component that will retain states of different list instances
 
 var EditableList = function (_React$Component) {
   _inherits(EditableList, _React$Component);
@@ -124,7 +112,7 @@ var EditableList = function (_React$Component) {
   }
 
   _createClass(EditableList, [{
-    key: 'signal',
+    key: "signal",
     value: function signal(msg) {
       var _this2 = this;
 
@@ -134,7 +122,7 @@ var EditableList = function (_React$Component) {
       };
     }
   }, {
-    key: 'render',
+    key: "render",
     value: function render() {
       return this.props.view(this.signal.bind(this), this.state.model);
     }
@@ -143,12 +131,18 @@ var EditableList = function (_React$Component) {
   return EditableList;
 }(React.Component);
 
+EditableList.defaultProps = { model: model, update: update, view: view };
+
+/**
+ * MAIN App
+ */
+// Wrap two list instances inside a board made of columns
 var Column = function Column(props) {
   return React.createElement(
-    'div',
+    "div",
     null,
     React.createElement(
-      'p',
+      "p",
       null,
       props.head
     ),
@@ -158,16 +152,16 @@ var Column = function Column(props) {
 var Board = function Board() {
   return React.createElement(
     Column,
-    { head: 'Eating at MacDonals' },
+    { head: "Eating at MacDonals" },
     React.createElement(
       Column,
-      { head: 'Pros' },
-      React.createElement(EditableList, { model: model1, update: update, view: view })
+      { head: "Pros" },
+      React.createElement(EditableList, null)
     ),
     React.createElement(
       Column,
-      { head: 'Cons' },
-      React.createElement(EditableList, { model: model2, update: update, view: view })
+      { head: "Cons" },
+      React.createElement(EditableList, null)
     )
   );
 };
