@@ -3,6 +3,32 @@
   <head>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.4.2/react.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.4.2/react-dom.js"></script>
+    <style>
+      * {box-sizing: border-box;}
+      #app {width: 100%}
+      .board {
+        width: 800px;
+        margin: 100px auto;
+        border: 1px dashed #666;
+        display: flex; 
+        flex-wrap: wrap; 
+      }
+      .board > div { flex: 1 0 50%; }
+      .board > p:first-child {
+        flex: 0 1 100%; 
+        background: repeating-linear-gradient(-25deg, #666, #666 1px, #fff 1px, #fff 8px);
+        border-bottom: 1px dashed #666;
+      }
+      .column { margin-top: 30px; }
+      .col-head {
+        margin: 0;
+        padding: 5px;
+        font-size: 1.4em;
+        font-weight: bold;
+        text-align: center;
+      }
+      
+    </style>
   </head>
   <body>
     <div id="app"></div>

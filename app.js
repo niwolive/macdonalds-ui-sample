@@ -74,12 +74,12 @@ EditableList.defaultProps = {model: model, update: update, view: view};
  * MAIN App
  */
 // Wrap two list instances inside a board made of columns
-const Column = props => (<div>
-                           <p>{props.head}</p>
+const Column = props => (<div className={(props.className || "") + " column"}>
+                           <p className="col-head">{props.head}</p>
                            {props.children}
                          </div>);
 const Board = () => {
-  return (<Column head="Eating at MacDonals">
+  return (<Column className="board" head="Eating at MacDonals">
             <Column head="Pros"><EditableList /></Column>
             <Column head="Cons"><EditableList /></Column>
           </Column>);

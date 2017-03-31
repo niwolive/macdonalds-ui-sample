@@ -13,7 +13,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 /**
- * HELPER FUNCTIONS
+ * UTILITIES
  */
 
 /**
@@ -35,9 +35,7 @@ var compose = function compose(first) {
 /**
  * MODEL
  */
-var model = {
-  state: new Map()
-};
+var model = { state: new Map() };
 
 /**
  * UPDATE
@@ -58,6 +56,9 @@ var update = function update(msg) {
 
 /**
  * VIEW
+ * This function is used in the EditableList React component to allow binding a 
+ * signal: allows the update messages to be attached to specific instance of a React component
+ * model: allows an instance-specific state to be bound as the model for the view
  */
 var view = function view(signal, model) {
   // When handling keypresses, trigger the 'append' signal only if key 'Enter' is pressed
@@ -94,6 +95,7 @@ var view = function view(signal, model) {
     var state = _ref3.state;
     return [].concat(_toConsumableArray(state)).map(ListItem).concat([InputItem(state.size)]);
   };
+  // Embed in a container the list of all the list items matching the given model
   return compose(Container, mapItems)(model);
 };
 
@@ -124,6 +126,7 @@ var EditableList = function (_React$Component) {
   }, {
     key: "render",
     value: function render() {
+      // Apply the view to the instance, binding its signal function to the current instance, and its model to the state of the current instance
       return this.props.view(this.signal.bind(this), this.state.model);
     }
   }]);
@@ -140,10 +143,10 @@ EditableList.defaultProps = { model: model, update: update, view: view };
 var Column = function Column(props) {
   return React.createElement(
     "div",
-    null,
+    { className: (props.className || "") + " column" },
     React.createElement(
       "p",
-      null,
+      { className: "col-head" },
       props.head
     ),
     props.children
@@ -152,7 +155,7 @@ var Column = function Column(props) {
 var Board = function Board() {
   return React.createElement(
     Column,
-    { head: "Eating at MacDonals" },
+    { className: "board", head: "Eating at MacDonals" },
     React.createElement(
       Column,
       { head: "Pros" },
